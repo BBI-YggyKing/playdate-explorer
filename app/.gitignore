@@ -1,0 +1,6 @@
+# Exclude CMake-generated build files.
+build/
+
+# Exclude build artifacts.
+*.pdx/
+Source/pdex.bin

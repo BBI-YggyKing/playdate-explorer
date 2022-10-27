@@ -1,0 +1,6 @@
+[
+    {
+      "name": "Playdate Device",
+      "toolchainFile": "${env:PLAYDATE_SDK}/C_API/buildsupport/arm_patched.cmake"
+    }
+  ]

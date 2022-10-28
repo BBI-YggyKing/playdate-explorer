@@ -30,19 +30,23 @@ static Test tests[] =
 static int testindex = 0;
 static int testcount = sizeof(tests)/sizeof(Test);
 
-void drawtext(char* txt)
+void drawtestresult(char* title, int result)
 {
-	pd->graphics->drawText(txt, strlen(txt), kASCIIEncoding, 0, textpos);
+	char *summary;
+	pd->system->formatString(&summary, "%s: %d", title, result);
+	pd->graphics->drawText(summary, strlen(summary), kASCIIEncoding, 0, textpos);
+	pd->system->realloc(summary, 0);
+
 	textpos += TEXTHEIGHT;
 }
 
 // Run one test.
 void runtest(Test* test)
 {
-	drawtext(test->title);
 	pd->system->logToConsole(test->title);
 	int result = test->testfn(pd);
 	pd->system->logToConsole("\treturned %d", result);
+	drawtestresult(test->title, result);
 }
 
 // Run one test each frame.

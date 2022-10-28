@@ -1,62 +1,56 @@
-//
-//  main.c
-//
 //  Copyright (c) 2022 Yossarian King. All rights reserved.
-//
 
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "pdexplorer.h"
 #include "pd_api.h"
+
+#define RUNTEST(FN) runtest(#FN, FN)
+#define TEXTHEIGHT 16
 
 static PlaydateAPI* pd = NULL;
 static LCDFont* font;
+static int first = 1;
+static int textpos = 0;
 
-#define TEXT_WIDTH 86
-#define TEXT_HEIGHT 16
-
-int x = (400-TEXT_WIDTH)/2;
-int y = (240-TEXT_HEIGHT)/2;
-int dx = 1;
-int dy = 2;
-
-int sign(int x)
+void drawtext(char* txt)
 {
-    return (x > 0) - (x < 0);
+	pd->graphics->drawText(txt, strlen(txt), kASCIIEncoding, 0, textpos);
+	textpos += TEXTHEIGHT;
 }
 
-static int
-update(__attribute__ ((unused)) void* ud)
+void runtest(char* title, int (*testfn)(PlaydateAPI* pd))
 {
-	int delta = pd->system->getCrankChange() / 2.0f;
-	if (!delta)
-		return 0;
+	drawtext(title);
+	int result = testfn(pd);
+	pd->system->logToConsole("%s: %d", title, result);
+}
 
-	int s = sign(delta);
-	for (int i = 0; i != delta; i += s)
-	{
-		x += dx * s; y += dy * s;
-	
-		if ( x < 0 || x > LCD_COLUMNS - TEXT_WIDTH )
-			dx = -dx;
-	
-		if ( y < 0 || y > LCD_ROWS - TEXT_HEIGHT )
-			dy = -dy;
-	}
-        
+void runtests()
+{
 	pd->graphics->clear(kColorWhite);
 	pd->graphics->setFont(font);
 	pd->graphics->setDrawMode(kDrawModeCopy);
-	pd->graphics->drawText("Let's explore", strlen("Let's explore"), kASCIIEncoding, x, y);
 
-	pd->system->drawFPS(0,0);
+	RUNTEST(memory_maxalloc);
+	RUNTEST(memory_fragments);
+}
 
-	return 1;
+int update(__attribute__ ((unused)) void* ud)
+{
+	if (first)
+	{
+		runtests();
+		first = 0;
+		return 1;
+	}
+
+	return 0;
 }
 
 
-int
-eventHandler(PlaydateAPI* playdate, PDSystemEvent event, __attribute__ ((unused)) uint32_t arg)
+int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, __attribute__ ((unused)) uint32_t arg)
 {
 	if ( event == kEventInit )
 	{

@@ -3,15 +3,17 @@
 #include <stdlib.h>
 #include "pd_api.h"
 
-#define BUFSIZE (1024 * 1024)
+#define BUFSIZE (4 * 1024 * 1024)
 #define BYTESPERITEM sizeof(int)
 #define MINSTEP BYTESPERITEM
 #define MAXSTEP 256
 #define DELTASTEP BYTESPERITEM
-#define REPEATS 4
 
+// cache_linesize
+//
 // Iterate through memory with various step sizes.
-int cache_dcache_linesize(PlaydateAPI* pd)
+// Return cache line size (deduced from timings).
+int cache_linesize(PlaydateAPI* pd)
 {
     void* buf = NULL;
     buf = pd->system->realloc(buf, BUFSIZE);
@@ -30,24 +32,24 @@ int cache_dcache_linesize(PlaydateAPI* pd)
     int linesize = 0;
     for (int step = MINSTEP; step <= MAXSTEP; step += DELTASTEP)
     {
+        // Volatile so references inside the loop won't be optimized away, ensuring memory is actually accessed.
         volatile int acc = 0;
+
         pd->system->resetElapsedTime();
-        for (int i = 0; i < REPEATS; ++i)
+        for (void* b = buf; b < bufend; b += step)
         {
-            for (void* b = buf; b < bufend; b += step)
-            {
-                acc += *((int*)b);
-            }
+            acc += *((int*)b);
         }
         float ms = pd->system->getElapsedTime() * 1000.0f;              // convert to ms
-        pd->system->logToConsole("\t%d\t%.2f\t%d", step, (double)ms);   // double to avoid implicit cast warning
+        pd->system->logToConsole("\t%d\t%.2f", step, (double)ms);   // double to avoid implicit cast warning
 
         // 8% faster than previous iteration? If so we probably hit the cache line size.
+        // No, there's nothing terribly principled about this, but it catches the correct result.
         if ((prevms > 0.0f) && (linesize == 0))
         {
             if ((prevms - ms)/prevms > 0.08f)
             {
-                linesize = step - DELTASTEP;
+                linesize = step - DELTASTEP;    // i.e. the previous step size, before we got faster
             }
         }
         prevms = ms;

@@ -14,7 +14,11 @@
 // line to see how many cache lines can be read quickly - i.e. how
 // big is the cache.
 //
-// Return cache size (deduced from timings).
+// The same total number of memory accesses is performed on each buffer,
+// the only difference is the size of the buffer and thus its cache
+// behaviour.
+//
+// Return data cache size (deduced from timings).
 int cache_size(PlaydateAPI* pd)
 {
     int cachesize = 0;

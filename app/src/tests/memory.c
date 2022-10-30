@@ -22,6 +22,7 @@ int memory_maxalloc(PlaydateAPI* pd)
         }
     } while (mem == NULL);
 
+    pd->system->logToConsole("\tmem @ 0x%08x", mem);
     pd->system->realloc(mem, 0);
     return max;    
 }

@@ -20,12 +20,12 @@ Test;
 
 // C preprocesor shenanigans to declare test functions and then the list of tests.
 #define TEST(T) extern int T(PlaydateAPI* pd);
-#include "tests.h"
+#include "tests.def"
 
 #define TEST(T) { #T, T },
 static Test tests[] =
 {
-#include "tests.h"
+#include "tests.def"
 };
 static int testindex = 0;
 static int testcount = sizeof(tests)/sizeof(Test);

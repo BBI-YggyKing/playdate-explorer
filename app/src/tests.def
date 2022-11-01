@@ -1,6 +1,6 @@
-TEST(memory_maxalloc)
-TEST(memory_fragments)
-TEST(cache_linesize)
-TEST(cache_size)
+//TEST(memory_maxalloc)
+//TEST(memory_fragments)
+//TEST(cache_linesize)
+//TEST(cache_size)
 TEST(cache_icachesize)
 #undef TEST

@@ -1,0 +1,15 @@
+// Function is 32 bytes long - 16 bytes of call/return overhead, plus 16 bytes of inline assembly.
+#define FUNC(N) static void func##N()\
+{\
+asm volatile\
+(\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+);\
+}

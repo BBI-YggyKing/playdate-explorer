@@ -5,7 +5,7 @@
 
 #include "func.def"
 
-// Define enough 1K functions to be able to fill the instruction cache at least twice over.
+// Define enough functions to be able to fill the instruction cache at least twice over.
 // Cache is 4K (or so we expect to demonstrate), each function is 32 bytes, we need 2 x 4096 / 32 = 256 functions.
 FUNC(1)
 FUNC(2)
@@ -524,23 +524,7 @@ static void (*functable[])() =
     func256,
 };
 
-#define NCALLS 100000            // each test will make the same number of function calls
-
-// invalidateicache
-//
-// From https://developer.arm.com/documentation/ddi0489/d/initialization/about-initialization/initializing-and-enabling-the-l1-cache
-static void invalidateicache()
-{
-    // TODO: this isn't working - try running 4k of code instead
-    asm volatile
-    (
-        "MOV r0, #0x0\n\t"
-        "LDR r11, =0xE000EF50\n\t"
-        "STR r0, [r11]\n\t"
-        "DSB\n\t"
-        "ISB\n\t"
-    );
-}
+#define NCALLS 50000            // each test will make the same number of function calls
 
 static void func4k()
 {
@@ -1573,6 +1557,26 @@ static void func4k()
     );
 }
 
+// invalidateicache
+//
+// From https://developer.arm.com/documentation/ddi0489/d/initialization/about-initialization/initializing-and-enabling-the-l1-cache
+static void invalidateicache()
+{
+#if 0
+    // TODO: this isn't working - try running 4k of code instead
+    asm volatile
+    (
+        "MOV r0, #0x0\n\t"
+        "LDR r11, =0xE000EF50\n\t"
+        "STR r0, [r11]\n\t"
+        "DSB\n\t"
+        "ISB\n\t"
+    );
+#else
+    func4k();
+#endif
+}
+
 // cache_icachesize
 //
 // Demonstrate size of instruction cache by jumping around unpredictably in instruction memory.
@@ -1586,18 +1590,22 @@ int cache_icachesize(PlaydateAPI* pd)
     pd->system->logToConsole("\tcode size\ttime (ms)");
     for (int n = 1; n <= nfunctions; ++n)
     {
-        //invalidateicache();
-        func4k();
+        // Insert n-th entry in function table at a random spot,
+        // thus randomly sorting the first n entries, with the 
+        // idea of giving the branch prediction logic a hard time.
+        /*
+        int insert = rand()%n;
+        void* tmp = functable[insert];
+        functable[insert] = functable[n-1];
+        functable[n-1] = tmp;
+        */
+
+        invalidateicache();
         pd->system->resetElapsedTime();
 
-        // Use DJB2 hash function for function selection that should give
-        // the M7 branch prediction a hard time.
-        // http://www.cse.yorku.ca/~oz/hash.html
-        unsigned int hash = 5381;
         for (int c = 0; c < NCALLS; ++c)
         {
-            hash = (hash << 5) + hash + (c & 0xff);
-            functable[hash%n]();
+            functable[c%n]();
         }
         float ms = pd->system->getElapsedTime() * 1000.0f;
         int codesize = n * funcsize;

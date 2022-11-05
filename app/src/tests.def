@@ -3,4 +3,5 @@
 //TEST(cache_linesize)
 //TEST(cache_size)
 TEST(cache_icachesize)
+TEST(cpu_mhz)
 #undef TEST

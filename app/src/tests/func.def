@@ -1,31 +1,40 @@
-// Function is 32 bytes long - 16 bytes of call/return overhead, plus 16 bytes of inline assembly.
+// Blocks of MOV instructions. Each MOV is 2 bytes.
+// MOV rather than NOP, because, as manual says:
+//      NOP does nothing. NOP is not necessarily a time-consuming NOP. The processor
+//      might remove it from the pipeline before it reaches the execution stage.
+#define MOV8 \
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"
+#define MOV16 \
+MOV8 \
+MOV8
+#define MOV32 \
+MOV16 \
+MOV16
+#define MOV64 \
+MOV32 \
+MOV32
+#define MOV128 \
+MOV64 \
+MOV64
+#define MOV256 \
+MOV128 \
+MOV128
+
+
+// Function is 64 bytes long (two cache lines) - 16 bytes of call/return overhead, plus 48 bytes of inline assembly.
 #define FUNC(N) static void func##N()\
 {\
 asm volatile\
 (\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
-"mov r0,r0\n\t"\
+MOV8 \
+MOV8 \
+MOV8 \
 );\
 }

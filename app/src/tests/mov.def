@@ -1,0 +1,34 @@
+// Blocks of MOV instructions. Each MOV is 2 bytes.
+// MOV rather than NOP, because, as manual says:
+//      NOP does nothing. NOP is not necessarily a time-consuming NOP. The processor
+//      might remove it from the pipeline before it reaches the execution stage.
+#define MOV8 \
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"\
+"mov r0,r0\n\t"
+#define MOV16 \
+MOV8 \
+MOV8
+#define MOV32 \
+MOV16 \
+MOV16
+#define MOV64 \
+MOV32 \
+MOV32
+#define MOV128 \
+MOV64 \
+MOV64
+#define MOV256 \
+MOV128 \
+MOV128
+#define MOV512 \
+MOV256 \
+MOV256
+#define MOV1024 \
+MOV512 \
+MOV512

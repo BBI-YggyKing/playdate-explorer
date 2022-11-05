@@ -3,14 +3,13 @@
 #include <stdlib.h>
 #include "pd_api.h"
 
-#include "func.def"
+#include "mov.def"
 
 static void mov512()
 {
     asm volatile
     (
-        MOV256
-        MOV256
+        MOV512
     );
 }
 
@@ -18,10 +17,7 @@ static void mov1024()
 {
     asm volatile
     (
-        MOV256
-        MOV256
-        MOV256
-        MOV256
+        MOV1024
     );
 }
 
